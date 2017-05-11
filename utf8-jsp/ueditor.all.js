@@ -89,7 +89,7 @@ var utils = UE.utils = {
         if (obj == null) return;
         if (obj.length === +obj.length) {
             for (var i = 0, l = obj.length; i < l; i++) {
-                if(iterator.call(context, obj[i], i, obj) === false)
+                if(iterator.call(context, obj[i], i, obj) === false)//call ?
                     return false;
             }
         } else {
@@ -109,54 +109,12 @@ var utils = UE.utils = {
         var noop = new Function();//create a new object
         noop.prototype = obj;
         obj = new noop;
-        noop.prototype = null;
+        noop.prototype = null;//release noop
         return obj;
     },
 
-    /**
-     * 将source对象中的属性扩展到target对象上
-     * @method extend
-     * @remind 该方法将强制把source对象上的属性复制到target对象上
-     * @see UE.utils.extend(Object,Object,Boolean)
-     * @param { Object } target 目标对象， 新的属性将附加到该对象上
-     * @param { Object } source 源对象， 该对象的属性会被附加到target对象上
-     * @return { Object } 返回target对象
-     * @example
-     * ```javascript
-     *
-     * var target = { name: 'target', sex: 1 },
-     *      source = { name: 'source', age: 17 };
-     *
-     * UE.utils.extend( target, source );
-     *
-     * //output: { name: 'source', sex: 1, age: 17 }
-     * console.log( target );
-     *
-     * ```
-     */
-
-    /**
-     * 将source对象中的属性扩展到target对象上， 根据指定的isKeepTarget值决定是否保留目标对象中与
-     * 源对象属性名相同的属性值。
-     * @method extend
-     * @param { Object } target 目标对象， 新的属性将附加到该对象上
-     * @param { Object } source 源对象， 该对象的属性会被附加到target对象上
-     * @param { Boolean } isKeepTarget 是否保留目标对象中与源对象中属性名相同的属性
-     * @return { Object } 返回target对象
-     * @example
-     * ```javascript
-     *
-     * var target = { name: 'target', sex: 1 },
-     *      source = { name: 'source', age: 17 };
-     *
-     * UE.utils.extend( target, source, true );
-     *
-     * //output: { name: 'target', sex: 1, age: 17 }
-     * console.log( target );
-     *
-     * ```
-     */
-    extend:function (t, s, b) {
+    //merge property
+    extend:function (t, s, b) {//merge  s is [key:value] target 目标对象， 新的属性将附加到该对象上 source 源对象， 该对象的属性会被附加到target对象上isKeepTarget 是否保留目标对象中与源对象中属性名相同的属性
         if (s) {
             for (var k in s) {
                 if (!b || !t.hasOwnProperty(k)) {
@@ -169,26 +127,6 @@ var utils = UE.utils = {
 
     /**
      * 将给定的多个对象的属性复制到目标对象target上
-     * @method extend2
-     * @remind 该方法将强制把源对象上的属性复制到target对象上
-     * @remind 该方法支持两个及以上的参数， 从第二个参数开始， 其属性都会被复制到第一个参数上。 如果遇到同名的属性，
-     *          将会覆盖掉之前的值。
-     * @param { Object } target 目标对象， 新的属性将附加到该对象上
-     * @param { Object... } source 源对象， 支持多个对象， 该对象的属性会被附加到target对象上
-     * @return { Object } 返回target对象
-     * @example
-     * ```javascript
-     *
-     * var target = {},
-     *     source1 = { name: 'source', age: 17 },
-     *     source2 = { title: 'dev' };
-     *
-     * UE.utils.extend2( target, source1, source2 );
-     *
-     * //output: { name: 'source', age: 17, title: 'dev' }
-     * console.log( target );
-     *
-     * ```
      */
     extend2:function (t) {
         var a = arguments;
@@ -205,33 +143,6 @@ var utils = UE.utils = {
 
     /**
      * 模拟继承机制， 使得subClass继承自superClass
-     * @method inherits
-     * @param { Object } subClass 子类对象
-     * @param { Object } superClass 超类对象
-     * @warning 该方法只能让subClass继承超类的原型， subClass对象自身的属性和方法不会被继承
-     * @return { Object } 继承superClass后的子类对象
-     * @example
-     * ```javascript
-     * function SuperClass(){
-     *     this.name = "小李";
-     * }
-     *
-     * SuperClass.prototype = {
-     *     hello:function(str){
-     *         console.log(this.name + str);
-     *     }
-     * }
-     *
-     * function SubClass(){
-     *     this.name = "小张";
-     * }
-     *
-     * UE.utils.inherits(SubClass,SuperClass);
-     *
-     * var sub = new SubClass();
-     * //output: '小张早上好!
-     * sub.hello("早上好!");
-     * ```
      */
     inherits:function (subClass, superClass) {
         var oldP = subClass.prototype,
@@ -243,84 +154,15 @@ var utils = UE.utils = {
 
     /**
      * 用指定的context对象作为函数fn的上下文
-     * @method bind
-     * @param { Function } fn 需要绑定上下文的函数对象
-     * @param { Object } content 函数fn新的上下文对象
-     * @return { Function } 一个新的函数， 该函数作为原始函数fn的代理， 将完成fn的上下文调换工作。
-     * @example
-     * ```javascript
-     *
-     * var name = 'window',
-     *     newTest = null;
-     *
-     * function test () {
-     *     console.log( this.name );
-     * }
-     *
-     * newTest = UE.utils.bind( test, { name: 'object' } );
-     *
-     * //output: object
-     * newTest();
-     *
-     * //output: window
-     * test();
-     *
-     * ```
      */
-    bind:function (fn, context) {
+    bind:function (fn, context) {//The handler.apply() method is a trap for a function call.
         return function () {
             return fn.apply(context, arguments);
         };
     },
-
-    /**
-     * 创建延迟指定时间后执行的函数fn
-     * @method defer
-     * @param { Function } fn 需要延迟执行的函数对象
-     * @param { int } delay 延迟的时间， 单位是毫秒
-     * @warning 该方法的时间控制是不精确的，仅仅只能保证函数的执行是在给定的时间之后，
-     *           而不能保证刚好到达延迟时间时执行。
-     * @return { Function } 目标函数fn的代理函数， 只有执行该函数才能起到延时效果
-     * @example
-     * ```javascript
-     * var start = 0;
-     *
-     * function test(){
-     *     console.log( new Date() - start );
-     * }
-     *
-     * var testDefer = UE.utils.defer( test, 1000 );
-     * //
-     * start = new Date();
-     * //output: (大约在1000毫秒之后输出) 1000
-     * testDefer();
-     * ```
-     */
-
     /**
      * 创建延迟指定时间后执行的函数fn, 如果在延迟时间内再次执行该方法， 将会根据指定的exclusion的值，
      * 决定是否取消前一次函数的执行， 如果exclusion的值为true， 则取消执行，反之，将继续执行前一个方法。
-     * @method defer
-     * @param { Function } fn 需要延迟执行的函数对象
-     * @param { int } delay 延迟的时间， 单位是毫秒
-     * @param { Boolean } exclusion 如果在延迟时间内再次执行该函数，该值将决定是否取消执行前一次函数的执行，
-     *                     值为true表示取消执行， 反之则将在执行前一次函数之后才执行本次函数调用。
-     * @warning 该方法的时间控制是不精确的，仅仅只能保证函数的执行是在给定的时间之后，
-     *           而不能保证刚好到达延迟时间时执行。
-     * @return { Function } 目标函数fn的代理函数， 只有执行该函数才能起到延时效果
-     * @example
-     * ```javascript
-     *
-     * function test(){
-     *     console.log(1);
-     * }
-     *
-     * var testDefer = UE.utils.defer( test, 1000, true );
-     *
-     * //output: (两次调用仅有一次输出) 1
-     * testDefer();
-     * testDefer();
-     * ```
      */
     defer:function (fn, delay, exclusion) {
         var timerID;
@@ -332,39 +174,9 @@ var utils = UE.utils = {
         };
     },
 
+    
     /**
-     * 获取元素item在数组array中首次出现的位置, 如果未找到item， 则返回-1
-     * @method indexOf
-     * @remind 该方法的匹配过程使用的是恒等“===”
-     * @param { Array } array 需要查找的数组对象
-     * @param { * } item 需要在目标数组中查找的值
-     * @return { int } 返回item在目标数组array中首次出现的位置， 如果在数组中未找到item， 则返回-1
-     * @example
-     * ```javascript
-     * var item = 1,
-     *     arr = [ 3, 4, 6, 8, 1, 1, 2 ];
-     *
-     * //output: 4
-     * console.log( UE.utils.indexOf( arr, item ) );
-     * ```
-     */
-
-    /**
-     * 获取元素item数组array中首次出现的位置, 如果未找到item， 则返回-1。通过start的值可以指定搜索的起始位置。
-     * @method indexOf
-     * @remind 该方法的匹配过程使用的是恒等“===”
-     * @param { Array } array 需要查找的数组对象
-     * @param { * } item 需要在目标数组中查找的值
-     * @param { int } start 搜索的起始位置
-     * @return { int } 返回item在目标数组array中的start位置之后首次出现的位置， 如果在数组中未找到item， 则返回-1
-     * @example
-     * ```javascript
-     * var item = 1,
-     *     arr = [ 3, 4, 6, 8, 1, 2, 8, 3, 2, 1, 1, 4 ];
-     *
-     * //output: 9
-     * console.log( UE.utils.indexOf( arr, item, 5 ) );
-     * ```
+     * 获取元素item数组array中首次出现的位置, 如果未找到item， 
      */
     indexOf:function (array, item, start) {
         var index = -1;
